@@ -5,7 +5,7 @@ import api from "@/lib/api";
 import Sidebar from "@/components/Sidebar";
 
 export default function AdminDashboard() {
-  const [piData, setPiData] = useState(null);
+  const [piData, setPiData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [responseText, setResponseText] = useState("Click a button to send a command to the device.");
   const router = useRouter();
@@ -27,16 +27,10 @@ export default function AdminDashboard() {
     } catch (e: any) { setResponseText("Error: " + (e.message || "Failed")); }
   };
 
-  const getWings = () => {
-    if (!piData) return [];
-    return Object.entries(piData).filter(([key, val]) => !key.startsWith("system_") && typeof val === "object").map(([key, val]) => ({ id: key, ...val }));
-  };
-
+  const wings = piData ? Object.entries(piData).filter(([key]) => !key.startsWith("system_") && typeof piData[key] === "object").map(([key, val]: [string, Record<string, any>]) => ({ id: key, ...val })) : [];
   const activeWing = piData?.system_active_wing || null;
 
   if (loading) return <div className="flex items-center justify-center h-screen bg-gray-950 text-gray-500 text-lg">Connecting to device...</div>;
-
-  const wings = getWings();
 
   return (
     <div className="flex h-screen overflow-hidden">
