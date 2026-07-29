@@ -9,7 +9,7 @@ export default function AdminDashboard() {
   const apiKeyRef = useRef("");
   const [piData, setPiData] = useState<any>(null);
   const [formatInfo, setFormatInfo] = useState({ text: "Detecting...", color: "text-red-400" });
-  const [respStatus, setRespStatus] = useState("—");
+  const [respStatus, setRespStatus] = useState("â€”");
   const [respClass, setRespClass] = useState("text-slate-400");
   const [respMeta, setRespMeta] = useState("Send a command to see response");
   const [respBody, setRespBody] = useState("Click any button to send a command.");
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
         {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
 
-          {/* LEFT — Pi Control */}
+          {/* LEFT â€” Pi Control */}
           <div className="bg-gray-900 border border-[#1e2d4a] rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#1e2d4a] bg-[#1a2236]">
               <h2 className="text-xs font-semibold flex items-center gap-1.5">{"\uD83D\uDCE1"} Pi Control</h2>
@@ -411,7 +411,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* RIGHT — Pi Response */}
+          {/* RIGHT â€” Pi Response */}
           <div className="bg-gray-900 border border-[#1e2d4a] rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#1e2d4a] bg-[#1a2236]">
               <h2 className="text-xs font-semibold">{"\uD83D\uDCAC"} Pi Response</h2>
