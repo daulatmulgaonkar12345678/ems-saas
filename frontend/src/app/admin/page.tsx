@@ -207,7 +207,7 @@ export default function AdminDashboard() {
         {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
 
-          {/* LEFT â€” Pi Control */}
+          {/* LEFT ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Pi Control */}
           <div className="rounded-2xl overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(10,15,25,0.95))", border: "1px solid rgba(30,45,74,0.5)", boxShadow: "0 4px 30px rgba(0,0,0,0.2)" }}>
             <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid rgba(30,45,74,0.4)", background: "rgba(20,30,50,0.5)" }}>
               <h2 className="text-xs font-semibold flex items-center gap-2 text-slate-300">{"\uD83D\uDCE1"} Pi Control</h2>
@@ -325,7 +325,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* RIGHT â€” Pi Response */}
+          {/* RIGHT ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Pi Response */}
           <div className="rounded-2xl overflow-hidden" style={{ background: "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(10,15,25,0.95))", border: "1px solid rgba(30,45,74,0.5)", boxShadow: "0 4px 30px rgba(0,0,0,0.2)" }}>
             <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid rgba(30,45,74,0.4)", background: "rgba(20,30,50,0.5)" }}>
               <h2 className="text-xs font-semibold text-slate-300">{"\uD83D\uDCAC"} Pi Response</h2>
@@ -422,7 +422,7 @@ export default function AdminDashboard() {
   );
 }
 
-/* â”€â”€ Reusable Components â”€â”€ */
+/* ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Reusable Components ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ */
 
 function SectionTitle({ icon, children }: { icon: string; children: React.ReactNode }) {
   return (
