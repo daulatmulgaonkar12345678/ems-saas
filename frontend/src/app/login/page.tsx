@@ -16,12 +16,9 @@ export default function Login() {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('role', res.data.role);
       localStorage.setItem('name', res.data.name);
-      
       if (res.data.role === 'super_admin') router.push('/super-admin');
       else router.push('/admin');
-    } catch (err) {
-      setError('Invalid email or password');
-    }
+    } catch (err) { setError('Invalid email or password'); }
   };
 
   return (
@@ -32,36 +29,17 @@ export default function Login() {
           <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
           <p className="text-gray-500 mt-2">Sign in to your EMS Dashboard</p>
         </div>
-        
         <form onSubmit={handleLogin} className="space-y-6">
           {error && <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm">{error}</div>}
-          
           <div>
             <label className="text-sm font-medium text-gray-400 mb-2 block">Email Address</label>
-            <input 
-              type="email" required
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
-              placeholder="admin@ems.com"
-              value={email} onChange={e => setEmail(e.target.value)} 
-            />
+            <input type="email" required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all" placeholder="admin@ems.com" value={email} onChange={e => setEmail(e.target.value)} />
           </div>
-          
           <div>
             <label className="text-sm font-medium text-gray-400 mb-2 block">Password</label>
-            <input 
-              type="password" required
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
-              placeholder="........"
-              value={password} onChange={e => setPassword(e.target.value)} 
-            />
+            <input type="password" required className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all" placeholder="........" value={password} onChange={e => setPassword(e.target.value)} />
           </div>
-
-          <button 
-            type="submit" 
-            className="w-full bg-cyan-500 hover:bg-cyan-600 text-black font-bold py-3 rounded-lg transition-colors shadow-lg shadow-cyan-500/20"
-          >
-            Sign In
-          </button>
+          <button type="submit" className="w-full bg-cyan-500 hover:bg-cyan-600 text-black font-bold py-3 rounded-lg transition-colors shadow-lg shadow-cyan-500/20">Sign In</button>
         </form>
       </div>
     </div>
