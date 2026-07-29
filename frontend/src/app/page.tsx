@@ -346,7 +346,7 @@ export default function AdminDashboard() {
                   {wings.map((w: any) => (
                     <div key={w.id} className="flex items-center gap-2 mb-1.5 flex-wrap">
                       <span className="text-[11px] text-slate-500 min-w-[150px]">Wing {w.id} (cur: {w.target_days || 0}d):</span>
-                      <input type="number" className="px-2.5 py-1.5 rounded-md border border-[#1e2d4a] bg-[#1a2236] text-slate-200 text-[13px] font-bold w-[100px] text-center focus:outline-none focus:border-cyan-400" min={0} max={365} value={directDays[w.id] ?? w.target_days || 0} onChange={(e) => setDirectDays((p: any) => ({ ...p, [w.id]: e.target.value }))} />
+                      <input type="number" className="px-2.5 py-1.5 rounded-md border border-[#1e2d4a] bg-[#1a2236] text-slate-200 text-[13px] font-bold w-[100px] text-center focus:outline-none focus:border-cyan-400" min={0} max={365} value={(directDays[w.id] ?? w.target_days) || 0} onChange={(e) => setDirectDays((p: any) => ({ ...p, [w.id]: e.target.value }))} />
                     </div>
                   ))}
                 </>)}
