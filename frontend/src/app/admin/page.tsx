@@ -48,7 +48,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2 space-y-6">
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">📡 Pi Control</h2>
+              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">ðŸ“¡ Pi Control</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {wings.map((wing) => {
                   const pct = wing.target_days > 0 ? Math.min(100, Math.round((wing.used_days / wing.target_days) * 100)) : 0;
@@ -63,7 +63,7 @@ export default function AdminDashboard() {
                             <span className="text-white font-bold text-base">{wing.name}</span>
                             <div className="flex gap-2 mt-1">
                               <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${wing.meter_toggle === "ON" ? "bg-green-500/20 text-green-400" : "bg-gray-600/50 text-gray-400"}`}>{wing.meter_toggle || "OFF"}</span>
-                              {isActive && <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center gap-1">★ ACTIVE</span>}
+                              {isActive && <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center gap-1">â˜… ACTIVE</span>}
                             </div>
                           </div>
                         </div>
@@ -84,20 +84,20 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">⚙️ System Controls</h2>
+              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">âš™ï¸ System Controls</h2>
               <div className="grid grid-cols-3 gap-3">
-                <button onClick={() => sendCommand("/status")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">🟢</span> Status</button>
-                <button onClick={() => sendCommand("/control/force_on")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">💡</span> Force ON</button>
-                <button onClick={() => sendCommand("/control/reset")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-yellow-400 text-xs font-semibold flex flex-col items-center gap-1 hover:border-yellow-500/50 transition-all"><span className="text-xl">🔄</span> Reset Days</button>
-                <button onClick={() => sendCommand("/control/off_all")} className="p-3 bg-gray-800/50 hover:bg-red-900/30 rounded-xl text-red-400 text-xs font-semibold flex flex-col items-center gap-1 transition-all"><span className="text-xl">🗑</span> OFF All</button>
-                <button onClick={() => sendCommand("/control/estop")} className="p-3 bg-red-900/30 hover:bg-red-900/50 rounded-xl text-red-400 text-xs font-semibold flex flex-col items-center gap-1 transition-all"><span className="text-xl">⚠️</span> E-Stop</button>
-                <button onClick={() => sendCommand("/control/reboot_device")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">🔄</span> Reboot Pi</button>
+                <button onClick={() => sendCommand("/status")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">ðŸŸ¢</span> Status</button>
+                <button onClick={() => sendCommand("/control/force_on")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">ðŸ’¡</span> Force ON</button>
+                <button onClick={() => sendCommand("/control/reset")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-yellow-400 text-xs font-semibold flex flex-col items-center gap-1 hover:border-yellow-500/50 transition-all"><span className="text-xl">ðŸ”„</span> Reset Days</button>
+                <button onClick={() => sendCommand("/control/off_all")} className="p-3 bg-gray-800/50 hover:bg-red-900/30 rounded-xl text-red-400 text-xs font-semibold flex flex-col items-center gap-1 transition-all"><span className="text-xl">ðŸ—‘</span> OFF All</button>
+                <button onClick={() => sendCommand("/control/estop")} className="p-3 bg-red-900/30 hover:bg-red-900/50 rounded-xl text-red-400 text-xs font-semibold flex flex-col items-center gap-1 transition-all"><span className="text-xl">âš ï¸</span> E-Stop</button>
+                <button onClick={() => sendCommand("/control/reboot_device")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">ðŸ”„</span> Reboot Pi</button>
               </div>
             </div>
           </div>
           <div className="space-y-6">
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-lg font-bold text-white mb-5">💬 Device Response</h2>
+              <h2 className="text-lg font-bold text-white mb-5">ðŸ’¬ Device Response</h2>
               <div className="bg-black/60 rounded-xl p-4 font-mono text-xs text-green-400 min-h-[250px] whitespace-pre-wrap overflow-auto border border-green-500/30">{responseText}</div>
             </div>
           </div>
