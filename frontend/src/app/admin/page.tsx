@@ -27,7 +27,7 @@ export default function AdminDashboard() {
     } catch (e: any) { setResponseText("Error: " + (e.message || "Failed")); }
   };
 
-  const wings = piData ? Object.entries(piData).filter(([key]) => !key.startsWith("system_") && typeof piData[key] === "object").map(([key, val]: [string, Record<string, any>]) => ({ id: key, ...val })) : [];
+  const wings = piData ? Object.entries(piData).filter(([key]) => !key.startsWith("system_") && typeof piData[key] === "object").map(([key, val]: any) => ({ id: key, ...val })) : [];
   const activeWing = piData?.system_active_wing || null;
 
   if (loading) return <div className="flex items-center justify-center h-screen bg-gray-950 text-gray-500 text-lg">Connecting to device...</div>;
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <div className="xl:col-span-2 space-y-6">
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¡ Pi Control</h2>
+              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â¡ Pi Control</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {wings.map((wing) => {
                   const pct = wing.target_days > 0 ? Math.min(100, Math.round((wing.used_days / wing.target_days) * 100)) : 0;
@@ -63,7 +63,7 @@ export default function AdminDashboard() {
                             <span className="text-white font-bold text-base">{wing.name}</span>
                             <div className="flex gap-2 mt-1">
                               <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${wing.meter_toggle === "ON" ? "bg-green-500/20 text-green-400" : "bg-gray-600/50 text-gray-400"}`}>{wing.meter_toggle || "OFF"}</span>
-                              {isActive && <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center gap-1">ÃƒÂ¢Ã‹Å“Ã¢â‚¬Â¦ ACTIVE</span>}
+                              {isActive && <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center gap-1">ÃƒÆ’Ã‚Â¢Ãƒâ€¹Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ ACTIVE</span>}
                             </div>
                           </div>
                         </div>
@@ -84,20 +84,20 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">ÃƒÂ¢Ã…Â¡Ã¢â€žÂ¢ÃƒÂ¯Ã‚Â¸Ã‚Â System Controls</h2>
+              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â System Controls</h2>
               <div className="grid grid-cols-3 gap-3">
-                <button onClick={() => sendCommand("/status")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">ÃƒÂ°Ã…Â¸Ã…Â¸Ã‚Â¢</span> Status</button>
-                <button onClick={() => sendCommand("/control/force_on")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¡</span> Force ON</button>
-                <button onClick={() => sendCommand("/control/reset")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-yellow-400 text-xs font-semibold flex flex-col items-center gap-1 hover:border-yellow-500/50 transition-all"><span className="text-xl">ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Å¾</span> Reset Days</button>
-                <button onClick={() => sendCommand("/control/off_all")} className="p-3 bg-gray-800/50 hover:bg-red-900/30 rounded-xl text-red-400 text-xs font-semibold flex flex-col items-center gap-1 transition-all"><span className="text-xl">ÃƒÂ°Ã…Â¸Ã¢â‚¬â€Ã¢â‚¬Ëœ</span> OFF All</button>
-                <button onClick={() => sendCommand("/control/estop")} className="p-3 bg-red-900/30 hover:bg-red-900/50 rounded-xl text-red-400 text-xs font-semibold flex flex-col items-center gap-1 transition-all"><span className="text-xl">ÃƒÂ¢Ã…Â¡Ã‚Â ÃƒÂ¯Ã‚Â¸Ã‚Â</span> E-Stop</button>
-                <button onClick={() => sendCommand("/control/reboot_device")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Å¾</span> Reboot Pi</button>
+                <button onClick={() => sendCommand("/status")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¢</span> Status</button>
+                <button onClick={() => sendCommand("/control/force_on")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¡</span> Force ON</button>
+                <button onClick={() => sendCommand("/control/reset")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-yellow-400 text-xs font-semibold flex flex-col items-center gap-1 hover:border-yellow-500/50 transition-all"><span className="text-xl">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾</span> Reset Days</button>
+                <button onClick={() => sendCommand("/control/off_all")} className="p-3 bg-gray-800/50 hover:bg-red-900/30 rounded-xl text-red-400 text-xs font-semibold flex flex-col items-center gap-1 transition-all"><span className="text-xl">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“</span> OFF All</button>
+                <button onClick={() => sendCommand("/control/estop")} className="p-3 bg-red-900/30 hover:bg-red-900/50 rounded-xl text-red-400 text-xs font-semibold flex flex-col items-center gap-1 transition-all"><span className="text-xl">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â</span> E-Stop</button>
+                <button onClick={() => sendCommand("/control/reboot_device")} className="p-3 bg-gray-800/50 hover:bg-gray-700 rounded-xl text-gray-300 text-xs font-semibold flex flex-col items-center gap-1 hover:border-cyan-500/50 hover:text-cyan-400 transition-all"><span className="text-xl">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾</span> Reboot Pi</button>
               </div>
             </div>
           </div>
           <div className="space-y-6">
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-lg font-bold text-white mb-5">ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¬ Device Response</h2>
+              <h2 className="text-lg font-bold text-white mb-5">ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¬ Device Response</h2>
               <div className="bg-black/60 rounded-xl p-4 font-mono text-xs text-green-400 min-h-[250px] whitespace-pre-wrap overflow-auto border border-green-500/30">{responseText}</div>
             </div>
           </div>
