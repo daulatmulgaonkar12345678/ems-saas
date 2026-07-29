@@ -15,7 +15,7 @@
     "axios": "latest"
   },
   "devDependencies": {
-    "typescript": "latest",
+    "typescript": "^6.0.0",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
