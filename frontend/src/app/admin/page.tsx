@@ -1,10 +1,32 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/lib/a</div>
+import api from '@/lib/api';
+import Sidebar from '@/components/Sidebar';
+
+export default function AdminDashboard() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (localStorage.getItem('role') !== 'society_admin') return router.push('/login');
+    api.get('/api/admin/dashboard').then(res => { setData(res.data); setLoading(false); });
+  }, []);
+
+  const getStatusStyles = (status: string) => {
+    switch(status) { case 'ACTIVE': return 'border-green-500/50 bg-green-500/5'; case 'FULL': return 'border-red-500/50 bg-red-500/5'; default: return 'border-gray-800 bg-gray-900'; }
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar role="society_admin" />
+      <main className="flex-1 overflow-y-auto p-8">
+        <div className="mb-8 flex justify-between items-end">
+          <div><h1 className="text-3xl font-bold">Wing Overview</h1><p className="text-gray-500 mt-1">Real-time quota status</p></div>
           <div className="text-right"><p className="text-sm text-gray-500">Active Wing</p><p className="text-3xl font-bold text-cyan-400">{data?.active_wing || '-'}</p></div>
         </div>
-        {loading ? <div className="text-gray-500">Connecting to device...</div> : (
+        {loading ? <div className="text-gray-500">Connecting...</div> : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {data && Object.entries(data.wings).map(([key, wing]: any) => (
               <div key={key} className={`p-6 rounded-2xl border-2 ${getStatusStyles(wing.status)} transition-all hover:scale-[1.02]`}>

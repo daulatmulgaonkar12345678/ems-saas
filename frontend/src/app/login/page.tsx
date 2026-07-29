@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
@@ -15,7 +15,6 @@ export default function Login() {
       const res = await api.post('/api/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('role', res.data.role);
-      localStorage.setItem('name', res.data.name);
       if (res.data.role === 'super_admin') router.push('/super-admin');
       else router.push('/admin');
     } catch (err) { setError('Invalid email or password'); }
