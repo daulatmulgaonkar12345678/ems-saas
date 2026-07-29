@@ -181,9 +181,9 @@ export default function AdminDashboard() {
     const refreshPi = async () => {
       const r = await sendCmdRef.current("/status");
       if (r && r.http_status === 200 && r.body && !r.error) {
-        if (piInterval.current && piSlowRef.current) { clearInterval(piInterval.current); piInterval.current = setInterval(refreshPi, 5000); piSlowRef.current = false; }
+        if (piInterval.current && false.current) { clearInterval(piInterval.current); piInterval.current = setInterval(refreshPi, 5000); false.current = false; }
       } else {
-        if (piInterval.current && !piSlowRef.current) { clearInterval(piInterval.current); piInterval.current = setInterval(refreshPi, 30000); piSlowRef.current = true; }
+        if (piInterval.current && !false.current) { clearInterval(piInterval.current); piInterval.current = setInterval(refreshPi, 30000); false.current = true; }
       }
     };
     setTimeout(() => refreshPi(), 1500);
