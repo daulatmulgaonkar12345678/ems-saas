@@ -1,9 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pymongo import MongoClient
 from passlib.context import CryptContext
-from jose import JWTError, jwt
+from jose import jwt
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
@@ -42,7 +42,7 @@ def create_token(data: dict):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
 
-@app.post("/api/seed")
+@app.get("/api/seed")
 def seed_db():
     if db.users.count_documents({"role": "super_admin"}) == 0:
         db.users.insert_one({
@@ -62,7 +62,7 @@ def seed_db():
             "role": "society_admin",
             "society_id": str(db.societies.find_one({"name": "Prestine Society"})["_id"])
         })
-    return {"message": "Database Seeded! Super Admin: admin@ems.com / admin123"}
+    return {"message": "Database Seeded!"}
 
 @app.post("/api/auth/login")
 def login(user: UserLogin):
@@ -80,8 +80,6 @@ def login(user: UserLogin):
 @app.get("/api/super-admin/societies")
 def get_societies():
     societies = list(db.societies.find({}, {"_id": 0}))
-    for soc in societies:
-        soc["id"] = str(soc.get("_id"))
     return societies
 
 @app.post("/api/super-admin/societies")
