@@ -1,4 +1,4 @@
-﻿import os, json
+﻿import os, json, time
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,6 +13,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "db.json")
 SECRET_KEY = os.getenv("SECRET_KEY", "ems_super_secret_2026")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_keepalive_ts = time.time()
 
 def load_db():
     if os.path.exists(DB_FILE):
@@ -45,9 +46,21 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+@app.get("/keepalive")
+def keepalive():
+    global _keepalive_ts
+    _keepalive_ts = time.time()
+    return PlainTextResponse("alive")
+
 @app.get("/ping")
 def ping():
+    global _keepalive_ts
+    _keepalive_ts = time.time()
     return PlainTextResponse("pong")
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "uptime_keepalive": round(time.time() - _keepalive_ts)}
 
 @app.post("/api/seed")
 def seed_db():
@@ -56,8 +69,8 @@ def seed_db():
         s1 = next_id(db["societies"])
         db["societies"].append({"id": s1, "name": "Prestine Society", "location": "Mumbai", "plan": "Professional", "status": "active", "tailscale_ip": "", "pi_port": 5000, "api_key": "", "society_code": "1"})
         db["users"].extend([
-            {"id": next_id(db["users"), "email": "admin@ems.com", "name": "Super Admin", "password": pwd_context.hash("admin123"), "role": "super_admin", "society_id": None},
-            {"id": next_id(db["users"), "email": "sec@prestine.com", "name": "Rahul Sharma", "password": pwd_context.hash("sec123"), "role": "society_admin", "society_id": s1},
+            {"id": next_id(db["users"]), "email": "admin@ems.com", "name": "Super Admin", "password": pwd_context.hash("admin123"), "role": "super_admin", "society_id": None},
+            {"id": next_id(db["users"]), "email": "sec@prestine.com", "name": "Rahul Sharma", "password": pwd_context.hash("sec123"), "role": "society_admin", "society_id": s1},
             {"id": next_id(db["users"]), "email": "member@prestine.com", "name": "Amit Patel", "password": pwd_context.hash("member123"), "role": "member", "society_id": s1},
         ])
         save_db(db)
@@ -79,7 +92,35 @@ def get_societies():
     for s in db["societies"]:
         pi = db.get("pi_state", {}).get(s["id"])
         online = pi and (datetime.now() - datetime.fromisoformat(pi.get("last_sync", "2020-01-01T00:00:00"))).total_seconds() < 120
-        result.append({"id": s["id"], "name": s["name"], "location": s["location"], "plan": s["plan"], "status": s.get("status", "active"), "tailscale_ip": s.get("tailscale_ip", ""), "pi_port": s.get("pi_port", 5000), "api_key": s.get("api_key", ""), "society_code": s.get("society_code", ""), "pi_online": online, "last_sync": pi.get("last_sync") if pi else None, "active_wing": pi.get("active_wing") if pi else None, "emergency_stop": pi.get("emergency_stop", False) if pi else False, "firmware_version": pi.get("firmware_version", "?") if pi else None, "quota_lock_until": pi.get("quota_lock_until", "") if pi else "", "reset_day": pi.get("reset_day", 22) if pi else 22, "reset_day_lock_until": pi.get("reset_day_lock_until", "") if pi else ""})
+        wings = pi.get("wings", {}) if pi else {}
+        wing_toggles = {}
+        for wid, w in wings.items():
+            wing_toggles[wid] = {
+                "name": w.get("name", wid),
+                "used_days": w.get("used_days", 0),
+                "target_days": w.get("target_days", 0),
+                "clicks": w.get("clicks", 0),
+                "disabled": w.get("disabled", False),
+                "physical_toggle": w.get("physical_toggle", "UNKNOWN"),
+                "display_name": w.get("display_name", ""),
+            }
+        result.append({
+            "id": s["id"], "name": s["name"], "location": s["location"], "plan": s["plan"],
+            "status": s.get("status", "active"), "tailscale_ip": s.get("tailscale_ip", ""),
+            "pi_port": s.get("pi_port", 5000), "api_key": s.get("api_key", ""),
+            "society_code": s.get("society_code", ""),
+            "pi_online": online,
+            "last_sync": pi.get("last_sync") if pi else None,
+            "active_wing": pi.get("active_wing") if pi else None,
+            "emergency_stop": pi.get("emergency_stop", False) if pi else False,
+            "firmware_version": pi.get("firmware_version", "?") if pi else None,
+            "quota_lock_until": pi.get("quota_lock_until", "") if pi else "",
+            "reset_day": pi.get("reset_day", 22) if pi else 22,
+            "reset_day_lock_until": pi.get("reset_day_lock_until", "") if pi else "",
+            "wings": wing_toggles,
+            "watchdog_enabled": pi.get("watchdog_enabled", False) if pi else False,
+            "last_reboot_reason": pi.get("last_reboot_reason", "") if pi else "",
+        })
     return result
 
 @app.post("/api/super-admin/societies/save")
@@ -201,8 +242,37 @@ def pi_sync(payload: dict):
     else:
         sid = society["id"]
     if payload.get("key"): society["api_key"] = payload["key"]
-    wings = {wid: {"name": w.get("name", wid), "used_days": w.get("usedDays", 0), "target_days": w.get("targetDays", 0), "clicks": w.get("clicks", 0)} for wid, w in payload.get("wings", {}).items()}
-    pi_state = {"active_wing": payload.get("activeWing"), "wings": wings, "reset_day": payload.get("resetDay", 22), "emergency_stop": payload.get("emergencyStop", False), "firmware_version": payload.get("firmwareVersion", "?"), "uptime_seconds": payload.get("uptimeSeconds", 0), "cpu_temp": payload.get("cpuTemp", 0), "disk_free_mb": payload.get("diskFreeMB", 0), "last_sync": datetime.now().isoformat(), "boot_count": payload.get("bootCount", 0), "last_shutdown_reason": payload.get("lastShutdownReason", ""), "clock_source": payload.get("clockSource", ""), "locked": payload.get("locked", False), "pending_start": payload.get("pendingStart", False), "quota_lock_until": payload.get("quota_lock_until", ""), "reset_day_lock_until": payload.get("reset_day_lock_until", "")}
+    wings = {}
+    for wid, w in payload.get("wings", {}).items():
+        wings[wid] = {
+            "name": w.get("name", wid),
+            "display_name": w.get("display_name", ""),
+            "used_days": w.get("usedDays", 0),
+            "target_days": w.get("targetDays", 0),
+            "clicks": w.get("clicks", 0),
+            "disabled": w.get("disabled", False),
+            "physical_toggle": w.get("physicalToggle", "UNKNOWN"),
+        }
+    pi_state = {
+        "active_wing": payload.get("activeWing"),
+        "wings": wings,
+        "reset_day": payload.get("resetDay", 22),
+        "emergency_stop": payload.get("emergencyStop", False),
+        "firmware_version": payload.get("firmwareVersion", "?"),
+        "uptime_seconds": payload.get("uptimeSeconds", 0),
+        "cpu_temp": payload.get("cpuTemp", 0),
+        "disk_free_mb": payload.get("diskFreeMB", 0),
+        "last_sync": datetime.now().isoformat(),
+        "boot_count": payload.get("bootCount", 0),
+        "last_shutdown_reason": payload.get("lastShutdownReason", ""),
+        "clock_source": payload.get("clockSource", ""),
+        "locked": payload.get("locked", False),
+        "pending_start": payload.get("pendingStart", False),
+        "quota_lock_until": payload.get("quota_lock_until", ""),
+        "reset_day_lock_until": payload.get("reset_day_lock_until", ""),
+        "watchdog_enabled": payload.get("watchdog_enabled", False),
+        "last_reboot_reason": payload.get("last_reboot_reason", ""),
+    }
     if "pi_state" not in db: db["pi_state"] = {}
     db["pi_state"][sid] = pi_state
     if "pi_events" not in db: db["pi_events"] = {}
@@ -240,10 +310,26 @@ def download_firmware(version: str, key: str = ""):
 def queue_command(data: dict):
     db = load_db()
     sid = data.get("society_id")
+    cmd = data.get("command", "")
+    params = data.get("params", {})
+    wing = data.get("wing", "")
+    pi = db.get("pi_state", {}).get(sid, {})
+    if cmd in ("set_monthly_quota", "set_days") and pi.get("quota_lock_until", ""):
+        try:
+            lock_until = datetime.fromisoformat(pi["quota_lock_until"])
+            if datetime.now() < lock_until:
+                raise HTTPException(400, f"Quota locked until {pi['quota_lock_until']}")
+        except: pass
+    if cmd == "set_reset_day" and pi.get("reset_day_lock_until", ""):
+        try:
+            lock_until = datetime.fromisoformat(pi["reset_day_lock_until"])
+            if datetime.now() < lock_until:
+                raise HTTPException(400, f"Reset day locked until {pi['reset_day_lock_until']}")
+        except: pass
     if "pi_commands" not in db: db["pi_commands"] = {}
-    db["pi_commands"][sid] = {"command": data.get("command"), "wing": data.get("wing", ""), "params": data.get("params", {}), "queued_at": datetime.now().isoformat()}
+    db["pi_commands"][sid] = {"command": cmd, "wing": wing, "params": params, "queued_at": datetime.now().isoformat()}
     save_db(db)
-    return {"success": True, "message": "Command queued"}
+    return {"success": True, "message": "Command queued", "command": cmd}
 
 @app.get("/api/admin/pi-state")
 def get_pi_state(society_id: str):
@@ -266,5 +352,25 @@ def admin_dashboard(society_id: str = ""):
     if not pi: return {"connected": False}
     wings_data = {}
     for wid, w in pi.get("wings", {}).items():
-        wings_data[wid] = {"used_days": w.get("used_days", 0), "target_days": w.get("target_days", 0), "status": "ACTIVE" if pi.get("active_wing") == wid else "IDLE", "name": w.get("name", wid)}
-    return {"connected": True, "active_wing": pi.get("active_wing"), "reset_day": pi.get("reset_day", 22), "quota_lock_until": pi.get("quota_lock_until", ""), "reset_day_lock_until": pi.get("reset_day_lock_until", ""), "wings": wings_data, "emergency_stop": pi.get("emergency_stop", False)}
+        wings_data[wid] = {
+            "used_days": w.get("used_days", 0),
+            "target_days": w.get("target_days", 0),
+            "status": "ACTIVE" if pi.get("active_wing") == wid else "IDLE",
+            "name": w.get("name", wid),
+            "display_name": w.get("display_name", ""),
+            "disabled": w.get("disabled", False),
+            "physical_toggle": w.get("physical_toggle", "UNKNOWN"),
+            "clicks": w.get("clicks", 0),
+        }
+    return {
+        "connected": True,
+        "active_wing": pi.get("active_wing"),
+        "reset_day": pi.get("reset_day", 22),
+        "quota_lock_until": pi.get("quota_lock_until", ""),
+        "reset_day_lock_until": pi.get("reset_day_lock_until", ""),
+        "wings": wings_data,
+        "emergency_stop": pi.get("emergency_stop", False),
+        "watchdog_enabled": pi.get("watchdog_enabled", False),
+        "last_reboot_reason": pi.get("last_reboot_reason", ""),
+        "firmware_version": pi.get("firmware_version", "?"),
+    }
