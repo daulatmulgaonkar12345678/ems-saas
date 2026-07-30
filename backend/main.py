@@ -45,6 +45,10 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+@app.get("/ping")
+def ping():
+    return PlainTextResponse("pong")
+
 @app.post("/api/seed")
 def seed_db():
     db = load_db()
@@ -52,8 +56,8 @@ def seed_db():
         s1 = next_id(db["societies"])
         db["societies"].append({"id": s1, "name": "Prestine Society", "location": "Mumbai", "plan": "Professional", "status": "active", "tailscale_ip": "", "pi_port": 5000, "api_key": "", "society_code": "1"})
         db["users"].extend([
-            {"id": next_id(db["users"]), "email": "admin@ems.com", "name": "Super Admin", "password": pwd_context.hash("admin123"), "role": "super_admin", "society_id": None},
-            {"id": next_id(db["users"]), "email": "sec@prestine.com", "name": "Rahul Sharma", "password": pwd_context.hash("sec123"), "role": "society_admin", "society_id": s1},
+            {"id": next_id(db["users"), "email": "admin@ems.com", "name": "Super Admin", "password": pwd_context.hash("admin123"), "role": "super_admin", "society_id": None},
+            {"id": next_id(db["users"), "email": "sec@prestine.com", "name": "Rahul Sharma", "password": pwd_context.hash("sec123"), "role": "society_admin", "society_id": s1},
             {"id": next_id(db["users"]), "email": "member@prestine.com", "name": "Amit Patel", "password": pwd_context.hash("member123"), "role": "member", "society_id": s1},
         ])
         save_db(db)
@@ -75,7 +79,7 @@ def get_societies():
     for s in db["societies"]:
         pi = db.get("pi_state", {}).get(s["id"])
         online = pi and (datetime.now() - datetime.fromisoformat(pi.get("last_sync", "2020-01-01T00:00:00"))).total_seconds() < 120
-        result.append({"id": s["id"], "name": s["name"], "location": s["location"], "plan": s["plan"], "status": s.get("status", "active"), "tailscale_ip": s.get("tailscale_ip", ""), "pi_port": s.get("pi_port", 5000), "api_key": s.get("api_key", ""), "society_code": s.get("society_code", ""), "pi_online": online, "last_sync": pi.get("last_sync") if pi else None, "active_wing": pi.get("active_wing") if pi else None, "emergency_stop": pi.get("emergency_stop", False) if pi else False, "firmware_version": pi.get("firmware_version", "?") if pi else None})
+        result.append({"id": s["id"], "name": s["name"], "location": s["location"], "plan": s["plan"], "status": s.get("status", "active"), "tailscale_ip": s.get("tailscale_ip", ""), "pi_port": s.get("pi_port", 5000), "api_key": s.get("api_key", ""), "society_code": s.get("society_code", ""), "pi_online": online, "last_sync": pi.get("last_sync") if pi else None, "active_wing": pi.get("active_wing") if pi else None, "emergency_stop": pi.get("emergency_stop", False) if pi else False, "firmware_version": pi.get("firmware_version", "?") if pi else None, "quota_lock_until": pi.get("quota_lock_until", "") if pi else "", "reset_day": pi.get("reset_day", 22) if pi else 22, "reset_day_lock_until": pi.get("reset_day_lock_until", "") if pi else ""})
     return result
 
 @app.post("/api/super-admin/societies/save")
@@ -155,10 +159,7 @@ def save_firmware_version(data: dict):
     if "firmware_versions" not in db: db["firmware_versions"] = []
     existing = next((v for v in db["firmware_versions"] if v["version"] == version), None)
     if existing:
-        existing["code"] = code
-        existing["changelog"] = changelog
-        existing["forced"] = forced
-        existing["updated_at"] = datetime.now().isoformat()
+        existing["code"] = code; existing["changelog"] = changelog; existing["forced"] = forced; existing["updated_at"] = datetime.now().isoformat()
     else:
         db["firmware_versions"].insert(0, {"version": version, "code": code, "changelog": changelog, "forced": forced, "created_at": datetime.now().isoformat(), "updated_at": datetime.now().isoformat()})
     if forced:
@@ -201,7 +202,7 @@ def pi_sync(payload: dict):
         sid = society["id"]
     if payload.get("key"): society["api_key"] = payload["key"]
     wings = {wid: {"name": w.get("name", wid), "used_days": w.get("usedDays", 0), "target_days": w.get("targetDays", 0), "clicks": w.get("clicks", 0)} for wid, w in payload.get("wings", {}).items()}
-    pi_state = {"active_wing": payload.get("activeWing"), "wings": wings, "reset_day": payload.get("resetDay", 22), "emergency_stop": payload.get("emergencyStop", False), "firmware_version": payload.get("firmwareVersion", "?"), "uptime_seconds": payload.get("uptimeSeconds", 0), "cpu_temp": payload.get("cpuTemp", 0), "disk_free_mb": payload.get("diskFreeMB", 0), "last_sync": datetime.now().isoformat(), "boot_count": payload.get("bootCount", 0), "last_shutdown_reason": payload.get("lastShutdownReason", ""), "clock_source": payload.get("clockSource", ""), "locked": payload.get("locked", False), "pending_start": payload.get("pendingStart", False)}
+    pi_state = {"active_wing": payload.get("activeWing"), "wings": wings, "reset_day": payload.get("resetDay", 22), "emergency_stop": payload.get("emergencyStop", False), "firmware_version": payload.get("firmwareVersion", "?"), "uptime_seconds": payload.get("uptimeSeconds", 0), "cpu_temp": payload.get("cpuTemp", 0), "disk_free_mb": payload.get("diskFreeMB", 0), "last_sync": datetime.now().isoformat(), "boot_count": payload.get("bootCount", 0), "last_shutdown_reason": payload.get("lastShutdownReason", ""), "clock_source": payload.get("clockSource", ""), "locked": payload.get("locked", False), "pending_start": payload.get("pendingStart", False), "quota_lock_until": payload.get("quota_lock_until", ""), "reset_day_lock_until": payload.get("reset_day_lock_until", "")}
     if "pi_state" not in db: db["pi_state"] = {}
     db["pi_state"][sid] = pi_state
     if "pi_events" not in db: db["pi_events"] = {}
@@ -213,7 +214,8 @@ def pi_sync(payload: dict):
     if sid in cmds and cmds[sid].get("command"):
         reply["command"] = cmds[sid]["command"]
         if cmds[sid].get("wing"): reply["wing"] = cmds[sid]["wing"]
-        cmds[sid] = {"command": None, "wing": None, "queued_at": None}
+        reply["params"] = cmds[sid].get("params", {})
+        cmds[sid] = {"command": None, "wing": None, "params": {}, "queued_at": None}
     fw_versions = db.get("firmware_versions", [])
     pi_ver = payload.get("firmwareVersion", "0.0.0")
     forced_fw = next((v for v in fw_versions if v.get("forced")), None)
@@ -239,7 +241,7 @@ def queue_command(data: dict):
     db = load_db()
     sid = data.get("society_id")
     if "pi_commands" not in db: db["pi_commands"] = {}
-    db["pi_commands"][sid] = {"command": data.get("command"), "wing": data.get("wing", ""), "queued_at": datetime.now().isoformat()}
+    db["pi_commands"][sid] = {"command": data.get("command"), "wing": data.get("wing", ""), "params": data.get("params", {}), "queued_at": datetime.now().isoformat()}
     save_db(db)
     return {"success": True, "message": "Command queued"}
 
@@ -257,5 +259,12 @@ def get_pi_events(society_id: str, since: int = 0):
     return {"events": events[since:], "total": len(events), "next": len(events)}
 
 @app.get("/api/admin/dashboard")
-def admin_dashboard():
-    return {"active_wing": "A", "wings": {"A": {"used_days": 5, "target_days": 10, "status": "ACTIVE"}, "B": {"used_days": 2, "target_days": 10, "status": "IDLE"}, "C": {"used_days": 10, "target_days": 10, "status": "FULL"}, "D": {"used_days": 0, "target_days": 10, "status": "OFF"}}}
+def admin_dashboard(society_id: str = ""):
+    db = load_db()
+    if not society_id: return {"error": "society_id required"}
+    pi = db.get("pi_state", {}).get(society_id)
+    if not pi: return {"connected": False}
+    wings_data = {}
+    for wid, w in pi.get("wings", {}).items():
+        wings_data[wid] = {"used_days": w.get("used_days", 0), "target_days": w.get("target_days", 0), "status": "ACTIVE" if pi.get("active_wing") == wid else "IDLE", "name": w.get("name", wid)}
+    return {"connected": True, "active_wing": pi.get("active_wing"), "reset_day": pi.get("reset_day", 22), "quota_lock_until": pi.get("quota_lock_until", ""), "reset_day_lock_until": pi.get("reset_day_lock_until", ""), "wings": wings_data, "emergency_stop": pi.get("emergency_stop", False)}
