@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
@@ -35,7 +35,7 @@ export default function MemberDashboard() {
 
   const wings = piState ? Object.entries(piState.wings as Record<string, WingData>) : [];
   const activeWing = piState?.active_wing || null;
-  const isOnline = piState && (Date.now() - new Date(piState.last_sync).getTime()) < 120000;
+  const isOnline = piState && (Date.now() - new Date(piState.last_sync).getTime()) < 360000;
 
   if (loading) return <div className="flex h-screen items-center justify-center text-gray-500">Loading...</div>;
 
