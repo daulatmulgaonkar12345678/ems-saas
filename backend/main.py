@@ -339,6 +339,8 @@ def get_pi_state(society_id: str):
     db = load_db()
     state = db.get("pi_state", {}).get(society_id)
     if not state: return {"connected": False}
+    filtered_wings = {wid: w for wid, w in state.get("wings", {}).items() if w.get("target_days", 0) > 0}
+    state["wings"] = filtered_wings
     return {"connected": True, **state}
 
 @app.get("/api/admin/pi-events")
