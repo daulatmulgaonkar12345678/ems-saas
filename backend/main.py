@@ -95,6 +95,8 @@ def get_societies():
         wings = pi.get("wings", {}) if pi else {}
         wing_toggles = {}
         for wid, w in wings.items():
+            if w.get("target_days", 0) == 0:
+                continue
             wing_toggles[wid] = {
                 "name": w.get("name", wid),
                 "used_days": w.get("used_days", 0),
@@ -353,6 +355,8 @@ def admin_dashboard(society_id: str = ""):
     if not pi: return {"connected": False}
     wings_data = {}
     for wid, w in pi.get("wings", {}).items():
+        if w.get("target_days", 0) == 0:
+            continue
         wings_data[wid] = {
             "used_days": w.get("used_days", 0),
             "target_days": w.get("target_days", 0),
