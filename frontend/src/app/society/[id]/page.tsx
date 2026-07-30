@@ -63,7 +63,7 @@ export default function SocietyDetail() {
 
   const wings = piState ? Object.entries(piState.wings as Record<string, WingData>) : [];
   const activeWing = piState?.active_wing || null;
-  const isOnline = piState && (Date.now() - new Date(piState.last_sync).getTime()) < 120000;
+  const isOnline = piState && (Date.now() - new Date(piState.last_sync).getTime()) < 360000;
   const uptime = piState ? Math.floor(piState.uptime_seconds / 3600) + "h " + Math.floor((piState.uptime_seconds % 3600) / 60) + "m" : "--";
   const sinceSync = piState ? Math.floor((Date.now() - new Date(piState.last_sync).getTime()) / 1000) + "s ago" : "--";
 
