@@ -91,7 +91,7 @@ def get_societies():
     result = []
     for s in db["societies"]:
         pi = db.get("pi_state", {}).get(s["id"])
-        online = pi and (datetime.now() - datetime.fromisoformat(pi.get("last_sync", "2020-01-01T00:00:00"))).total_seconds() < 120
+        online = pi and (datetime.now() - datetime.fromisoformat(pi.get("last_sync", "2020-01-01T00:00:00"))).total_seconds() < 360
         wings = pi.get("wings", {}) if pi else {}
         wing_toggles = {}
         for wid, w in wings.items():
@@ -127,7 +127,7 @@ def get_societies():
 def save_society(data: dict):
     db = load_db()
     sid = data.get("id")
-    society = {"name": data["name"], "location": data["location"], "plan": data["plan"], "status": "active", "tailscale_ip": data.get("tailscale_ip", ""), "pi_port": int(data.get("pi_port", 5000)), "api_key": data.get("api_key", ""), "society_code": data.get("society_code", "")}
+    society = {"name": data.get("name", ""), "location": data.get("location", ""), "plan": data.get("plan", "Basic"), "status": "active", "tailscale_ip": data.get("tailscale_ip", ""), "pi_port": int(data.get("pi_port", 5000)), "api_key": data.get("api_key", ""), "society_code": data.get("society_code", "")}
     if sid:
         for s in db["societies"]:
             if s["id"] == sid: s.update(society); break
