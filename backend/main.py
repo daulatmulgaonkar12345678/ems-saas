@@ -66,15 +66,15 @@ def health():
 def seed_db():
     db = load_db()
     if not any(u.get("role") == "super_admin" for u in db["users"]):
-        s1 = next_id(db["societies"])
-        db["societies"].append({"id": s1, "name": "Prestine Society", "location": "Mumbai", "plan": "Professional", "status": "active", "tailscale_ip": "", "pi_port": 5000, "api_key": "", "society_code": "1"})
         db["users"].extend([
             {"id": next_id(db["users"]), "email": "admin@ems.com", "name": "Super Admin", "password": pwd_context.hash("admin123"), "role": "super_admin", "society_id": None},
-            {"id": next_id(db["users"]), "email": "sec@prestine.com", "name": "Rahul Sharma", "password": pwd_context.hash("sec123"), "role": "society_admin", "society_id": s1},
-            {"id": next_id(db["users"]), "email": "member@prestine.com", "name": "Amit Patel", "password": pwd_context.hash("member123"), "role": "member", "society_id": s1},
         ])
         save_db(db)
     return {"message": "Seeded! admin@ems.com / sec@prestine.com / member@prestine.com"}
+
+@app.on_event("startup")
+async def auto_seed():
+    seed_db()
 
 @app.post("/api/auth/login")
 def login(user: UserLogin):
