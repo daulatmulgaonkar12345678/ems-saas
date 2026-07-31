@@ -17,7 +17,12 @@ _keepalive_ts = time.time()
 
 def load_db():
     if os.path.exists(DB_FILE):
-        with open(DB_FILE, "r") as f: return json.load(f)
+        with open(DB_FILE, "r") as f:
+            db = json.load(f)
+            for nk in ["pi_state", "pi_events", "pi_commands"]:
+                if nk in db and db[nk]:
+                    db[nk] = {int(k): v for k, v in db[nk].items()}
+            return db
     return {"users": [], "societies": [], "pi_state": {}, "pi_events": {}, "pi_commands": {}, "firmware_versions": []}
 
 def save_db(data):
@@ -99,7 +104,7 @@ def get_societies():
     db = load_db()
     result = []
     for s in db["societies"]:
-        pi = db.get("pi_state", {}).get(s["id"])
+        pi = db.get("pi_state", {}).get(int(s["id"]))
         online = pi and (datetime.now() - datetime.fromisoformat(pi.get("last_sync", "2020-01-01T00:00:00"))).total_seconds() < 360
         wings = pi.get("wings", {}) if pi else {}
         wing_toggles = {}
@@ -154,7 +159,7 @@ def delete_society(data: dict):
     sid = data.get("id")
     db["societies"] = [s for s in db["societies"] if s["id"] != sid]
     for key in ["pi_state", "pi_events", "pi_commands"]:
-        db.get(key, {}).pop(sid, None)
+        db.get(key, {}).pop(int(sid), None)
     db["users"] = [u for u in db["users"] if u.get("society_id") != sid]
     save_db(db)
     return {"message": "Deleted"}
