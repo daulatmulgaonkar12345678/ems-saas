@@ -115,7 +115,35 @@ export default function SocietyDetail() {
   const resetDayLocked = piState?.reset_day_lock_until ? new Date(piState.reset_day_lock_until) > new Date() : false;
   const quotaLocked = piState?.quota_lock_until ? new Date(piState.quota_lock_until) > new Date() : false;
 
-  if (loading) return <div className="flex h-screen items-center justify-center text-gray-500">Loading...</div>;
+  
+
+  const sendResetDay = async () => {
+    const day = parseInt(resetDayInput);
+    if (!day || day < 1 || day > 28 || !societyId) return;
+    setSettingResetDay(true);
+    setRespLabel("Set Reset Day");
+    setRespBody("Queuing...");
+    setRespOk(true);
+    try {
+      const lockUntil = isSuperAdmin ? null : new Date(Date.now() + 90*24*60*60*1000).toISOString();
+      const res = await api.post("/api/admin/pi-command", { society_id: societyId, command: "set_reset_day", params: { day, lock_until: lockUntil } });
+      if (res.data.success) {
+        setRespBody("Reset day set to " + day + "th." + (lockUntil ? " Locked 3 months until " + new Date(lockUntil).toLocaleDateString() + "." : ""));
+        setRespOk(true); setTimeout(fetchPiState, 5000);
+      } else { setRespBody("Failed: " + (res.data.message || "Unknown")); setRespOk(false); }
+    } catch (e: any) { setRespBody("Error: " + (e.message || "Network error")); setRespOk(false); }
+    setSettingResetDay(false);
+  };
+
+  const confirmResetDay = () => {
+    const day = parseInt(resetDayInput);
+    if (!day || day < 1 || day > 28) return;
+    let msg = "Set reset day to " + day + "th of every month?\n\nAll wings will reset to 0 days on this date.";
+    if (!isSuperAdmin) msg += "\n\nThis will be LOCKED for 3 months.";
+    if (!window.confirm(msg)) return;
+    sendResetDay();
+  };
+if (loading) return <div className="flex h-screen items-center justify-center text-gray-500">Loading...</div>;
 
   return (
     <div className="flex h-screen overflow-hidden">
