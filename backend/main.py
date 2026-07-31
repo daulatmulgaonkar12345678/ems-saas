@@ -314,7 +314,7 @@ def download_firmware(version: str, key: str = ""):
 @app.post("/api/admin/pi-command")
 def queue_command(data: dict):
     db = load_db()
-    sid = data.get("society_id")
+    sid = int(data.get("society_id", 0))
     cmd = data.get("command", "")
     params = data.get("params", {})
     wing = data.get("wing", "")
@@ -339,7 +339,7 @@ def queue_command(data: dict):
 @app.get("/api/admin/pi-state")
 def get_pi_state(society_id: str):
     db = load_db()
-    state = db.get("pi_state", {}).get(society_id)
+    state = db.get("pi_state", {}).get(int(society_id))
     if not state: return {"connected": False}
     filtered_wings = {wid: w for wid, w in state.get("wings", {}).items() if w.get("target_days", 0) > 0}
     state["wings"] = filtered_wings
@@ -348,14 +348,14 @@ def get_pi_state(society_id: str):
 @app.get("/api/admin/pi-events")
 def get_pi_events(society_id: str, since: int = 0):
     db = load_db()
-    events = db.get("pi_events", {}).get(society_id, [])
+    events = db.get("pi_events", {}).get(int(society_id), [])
     return {"events": events[since:], "total": len(events), "next": len(events)}
 
 @app.get("/api/admin/dashboard")
 def admin_dashboard(society_id: str = ""):
     db = load_db()
     if not society_id: return {"error": "society_id required"}
-    pi = db.get("pi_state", {}).get(society_id)
+    pi = db.get("pi_state", {}).get(int(society_id))
     if not pi: return {"connected": False}
     wings_data = {}
     for wid, w in pi.get("wings", {}).items():
