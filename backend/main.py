@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 app = FastAPI(title="EMS SaaS API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -216,9 +216,9 @@ def save_firmware_version(data: dict):
     if "firmware_versions" not in db: db["firmware_versions"] = []
     existing = next((v for v in db["firmware_versions"] if v["version"] == version), None)
     if existing:
-        existing["code"] = code; existing["changelog"] = changelog; existing["forced"] = forced; existing["updated_at"] = datetime.now().isoformat()
+        existing["code"] = code; existing["changelog"] = changelog; existing["forced"] = forced; existing["updated_at"] = datetime.now(timezone.utc).isoformat()
     else:
-        db["firmware_versions"].insert(0, {"version": version, "code": code, "changelog": changelog, "forced": forced, "created_at": datetime.now().isoformat(), "updated_at": datetime.now().isoformat()})
+        db["firmware_versions"].insert(0, {"version": version, "code": code, "changelog": changelog, "forced": forced, "created_at": datetime.now(timezone.utc).isoformat(), "updated_at": datetime.now(timezone.utc).isoformat()})
     if forced:
         for v in db["firmware_versions"]:
             if v["version"] != version: v["forced"] = False
@@ -259,7 +259,7 @@ def pi_sync(payload: dict):
     else:
         sid = int(society["id"])
     society["online"] = True
-    society["last_seen"] = datetime.now().isoformat()
+    society["last_seen"] = datetime.now(timezone.utc).isoformat()
     if payload.get("key"): society["api_key"] = payload["key"]
     wings = {}
     for wid, w in payload.get("wings", {}).items():
@@ -281,7 +281,7 @@ def pi_sync(payload: dict):
         "uptime_seconds": payload.get("uptimeSeconds", 0),
         "cpu_temp": payload.get("cpuTemp", 0),
         "disk_free_mb": payload.get("diskFreeMB", 0),
-        "last_sync": datetime.now().isoformat(),
+        "last_sync": datetime.now(timezone.utc).isoformat(),
         "boot_count": payload.get("bootCount", 0),
         "last_shutdown_reason": payload.get("lastShutdownReason", ""),
         "clock_source": payload.get("clockSource", ""),
@@ -347,7 +347,7 @@ def queue_command(data: dict):
                 raise HTTPException(400, f"Reset day locked until {pi['reset_day_lock_until']}")
         except: pass
     if "pi_commands" not in db: db["pi_commands"] = {}
-    db["pi_commands"][sid] = {"command": cmd, "wing": wing, "params": params, "queued_at": datetime.now().isoformat()}
+    db["pi_commands"][sid] = {"command": cmd, "wing": wing, "params": params, "queued_at": datetime.now(timezone.utc).isoformat()}
     save_db(db)
     return {"success": True, "message": "Command queued", "command": cmd}
 
