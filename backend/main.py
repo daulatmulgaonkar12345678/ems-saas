@@ -1,4 +1,4 @@
-﻿import os, json, time
+import os, json, time
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -242,16 +242,16 @@ def pi_sync(payload: dict):
     print("=== PI RAW PAYLOAD ===", payload)
     sid = int(payload.get("societyId", 0))
     db = load_db()
-    society = next((s for s in db["societies"] if s["id"] == sid), None)
+    society = next((s for s in db["societies"] if int(s["id"]) == sid), None)
     if not society:
-        society = next((s for s in db["societies"] if s.get("society_code") == sid), None)
+        society = next((s for s in db["societies"] if str(s.get("society_code", "")) == str(sid)), None)
     if not society:
         new_id = next_id(db["societies"])
         society = {"id": new_id, "name": payload.get("societyName", sid), "location": "Auto-detected", "plan": "Basic", "status": "active", "tailscale_ip": "", "pi_port": 5000, "api_key": payload.get("key", ""), "society_code": sid}
         db["societies"].append(society)
         sid = new_id
     else:
-        sid = society["id"]
+        sid = int(society["id"])
     society["online"] = True
     society["last_seen"] = datetime.now().isoformat()
     if payload.get("key"): society["api_key"] = payload["key"]
