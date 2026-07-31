@@ -89,19 +89,20 @@ export default function SocietyDetail() {
   const sendAllCalcDays = async () => {
     if (!isOnline || !societyId) return;
     setSendingDays(true);
-    let sent = 0;
-    for (const [wing, days] of Object.entries(calcResult)) {
-      if (!days || days < 1) continue;
-      try {
-        const lockUntil = new Date(Date.now() + 30*24*60*60*1000).toISOString();
-        const res = await api.post("/api/admin/pi-command", { society_id: societyId, command: "set_days", wing, params: { days, lock_until: lockUntil } });
-        if (res.data.success) sent++;
-      } catch {}
-    }
     setRespLabel("Send All Days");
-    setRespBody("Sent " + sent + "/" + Object.keys(calcResult).length + " wings. Pi will apply within 30s.");
+    setRespBody("Sending...");
     setRespOk(true);
+    try {
+      const wingsPayload: Record<string, number> = {};
+      for (const [w, d] of Object.entries(calcResult)) { if (d > 0) wingsPayload[w] = d; }
+      const params: Record<string, any> = { wings: wingsPayload };
+      if (!isSuperAdmin) { params.lock_until = new Date(Date.now() + 30*24*60*60*1000).toISOString(); }
+      const res = await api.post("/api/admin/pi-command", { society_id: societyId, command: "set_days", params });
+      if (res.data.success) { setRespBody("Sent " + Object.keys(wingsPayload).length + " wings. Pi will apply within 30s."); setRespOk(true); setTimeout(fetchPiState, 5000); }
+      else { setRespBody("Failed: " + (res.data.message || "Unknown")); setRespOk(false); }
+    } catch (e: any) { setRespBody("Error: " + (e.message || "Network error")); setRespOk(false); }
     setSendingDays(false);
+  };
     setTimeout(fetchPiState, 5000);
   };
 
