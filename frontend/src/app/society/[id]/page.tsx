@@ -29,7 +29,9 @@ export default function SocietyDetail() {
   const [calcCycleDays, setCalcCycleDays] = useState("30");
   const [calcWingUnits, setCalcWingUnits] = useState<Record<string, string>>({});
   const [calcResult, setCalcResult] = useState<Record<string, number>>({});
-  const [sendingDays, setSendingDays] = useState(false);
+  const [sendingDays, setSendingDays] = useState(false);
+  const [resetDayInput, setResetDayInput] = useState("");
+  const [settingResetDay, setSettingResetDay] = useState(false);
   const eventsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { const role = localStorage.getItem("role"); if (role !== "super_admin" && role !== "society_admin") router.push("/login"); }, [router]);
@@ -107,7 +109,11 @@ export default function SocietyDetail() {
   const activeWing = piState?.active_wing || null;
   const isOnline = piState && (Date.now() - new Date(piState.last_sync).getTime()) < 360000;
   const uptime = piState ? Math.floor(piState.uptime_seconds / 3600) + "h " + Math.floor((piState.uptime_seconds % 3600) / 60) + "m" : "--";
-  const sinceSync = piState ? Math.floor((Date.now() - new Date(piState.last_sync).getTime()) / 1000) + "s ago" : "--";
+  const sinceSync = piState ? Math.floor((Date.now() - new Date(piState.last_sync).getTime()) / 1000) + "s ago" : "--";
+  const role = typeof window !== "undefined" ? localStorage.getItem("role") : "";
+  const isSuperAdmin = role === "super_admin";
+  const resetDayLocked = piState?.reset_day_lock_until ? new Date(piState.reset_day_lock_until) > new Date() : false;
+  const quotaLocked = piState?.quota_lock_until ? new Date(piState.quota_lock_until) > new Date() : false;
 
   if (loading) return <div className="flex h-screen items-center justify-center text-gray-500">Loading...</div>;
 
@@ -252,7 +258,22 @@ export default function SocietyDetail() {
               </div>
             </div>
 
-            <div className="bg-gray-900/80 border border-gray-800 rounded-xl overflow-hidden">
+<div className="bg-gray-900/80 border border-gray-800 rounded-xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-800 bg-gray-800/50 flex items-center justify-between">
+                <h2 className="text-xs font-semibold text-gray-300">&#128197; Set Reset Date</h2>
+                {resetDayLocked && !isSuperAdmin && <span className="text-[9px] text-amber-400">Locked until {piState?.reset_day_lock_until ? new Date(piState.reset_day_lock_until).toLocaleDateString() : "--"}</span>}
+              </div>
+              <div className="p-4">
+                <div className="flex gap-2 items-center">
+                  <span className="text-[10px] text-gray-500">Day (1-28):</span>
+                  <input type="number" className="w-16 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-xs text-center text-gray-200 focus:outline-none focus:border-cyan-500" value={resetDayInput} onChange={(e) => setResetDayInput(e.target.value)} min="1" max="28" disabled={resetDayLocked && !isSuperAdmin} />
+                  <button onClick={confirmResetDay} disabled={settingResetDay || !isOnline || cmdLoading !== null || (resetDayLocked && !isSuperAdmin)} className="px-4 py-1.5 bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-bold rounded hover:bg-amber-500/30 disabled:opacity-30">{settingResetDay ? "Setting..." : "SET"}</button>
+                </div>
+                {piState?.reset_day && <div className="text-[9px] text-gray-600 mt-2">Current: {piState.reset_day}th of each month</div>}
+              </div>
+            </div>
+
+                        <div className="bg-gray-900/80 border border-gray-800 rounded-xl overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-800 bg-gray-800/50 flex items-center justify-between cursor-pointer" onClick={() => setShowCalc(!showCalc)}>
                 <h2 className="text-xs font-semibold text-gray-300">&#9889; Unit-to-Days Calculator</h2>
                 <span className="text-gray-600 text-xs">{showCalc ? "▲" : "▼"}</span>
@@ -293,7 +314,7 @@ export default function SocietyDetail() {
                         <div key={id} className="flex justify-between text-[10px]"><span className="text-gray-500">Wing {id}</span><span className="text-cyan-400 font-bold font-mono">{days} days</span></div>
                       ))}
                     
-                      <button onClick={sendAllCalcDays} disabled={sendingDays || !isOnline || cmdLoading !== null} className="w-full mt-2 py-1.5 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold rounded hover:bg-cyan-500/30 disabled:opacity-30">{sendingDays ? "Sending..." : "SEND ALL DAYS TO PI"}</button></div>
+                      <button onClick={sendAllCalcDays} disabled={sendingDays || !isOnline || cmdLoading !== null || (quotaLocked && !isSuperAdmin)} className="w-full mt-2 py-1.5 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold rounded hover:bg-cyan-500/30 disabled:opacity-30">{sendingDays ? "Sending..." : "SEND ALL DAYS TO PI"}</button></div>
                   )}
                 </div>
               )}
