@@ -149,7 +149,6 @@ def save_society(data: dict):
 
 @app.post("/api/super-admin/societies/delete")
 def delete_society(data: dict):
-    sid = int(sid)
     db = load_db()
     sid = data.get("id")
     db["societies"] = [s for s in db["societies"] if s["id"] != sid]
