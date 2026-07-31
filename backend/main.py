@@ -1,4 +1,4 @@
-﻿import os, json, time
+import os, json, time
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -244,6 +244,8 @@ def pi_sync(payload: dict):
         sid = new_id
     else:
         sid = society["id"]
+    society["online"] = True
+    society["last_seen"] = datetime.now().isoformat()
     if payload.get("key"): society["api_key"] = payload["key"]
     wings = {}
     for wid, w in payload.get("wings", {}).items():
