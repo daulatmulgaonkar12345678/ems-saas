@@ -316,7 +316,7 @@ export default function AdminDashboard() {
                   <input type="number" className="w-14 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-xs text-center text-gray-200 focus:outline-none focus:border-cyan-500" value={lcdTime} onChange={(e) => setLcdTime(e.target.value)} min="1" max="300" />
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => { if (!lcd1 && !lcd2) return; sendCmd("lcd", "", "LCD: " + lcd1 + " | " + lcd2); }} disabled={cmdLoading !== null || !isOnline || (!lcd1 && !lcd2)} className="flex-1 py-1.5 bg-cyan-500 text-black text-[10px] font-bold rounded disabled:opacity-30">SEND</button>
+                  <button onClick={() => { if (!lcd1 && !lcd2) return; sendCmd("lcd", "", "LCD: " + lcd1 + " | " + lcd2, { l1: lcd1, l2: lcd2, t: parseInt(lcdTime) || 10 }); }} disabled={cmdLoading !== null || !isOnline || (!lcd1 && !lcd2)} className="flex-1 py-1.5 bg-cyan-500 text-black text-[10px] font-bold rounded disabled:opacity-30">SEND</button>
                   <button onClick={() => { setLcd1(""); setLcd2(""); }} className="px-3 py-1.5 border border-gray-700 text-gray-500 text-[10px] rounded hover:border-red-500 hover:text-red-400">CLEAR</button>
                 </div>
               </div>
