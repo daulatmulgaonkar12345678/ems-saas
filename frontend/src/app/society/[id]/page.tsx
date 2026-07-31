@@ -86,55 +86,7 @@ export default function SocietyDetail() {
 
 
   };
-  const sendAllCalcDays = async () => {
-    if (!isOnline || !societyId) return;
-    setSendingDays(true);
-    setRespLabel("Send All Days");
-    setRespBody("Sending...");
-    setRespOk(true);
-    try {
-      const wingsPayload: Record<string, number> = {};
-      for (const [w, d] of Object.entries(calcResult)) { if (d > 0) wingsPayload[w] = d; }
-      const params: Record<string, any> = { wings: wingsPayload };
-      if (!isSuperAdmin) { params.lock_until = new Date(Date.now() + 30*24*60*60*1000).toISOString(); }
-      const res = await api.post("/api/admin/pi-command", { society_id: societyId, command: "set_days", params });
-      if (res.data.success) { setRespBody("Sent " + Object.keys(wingsPayload).length + " wings. Pi will apply within 30s."); setRespOk(true); setTimeout(fetchPiState, 5000); }
-      else { setRespBody("Failed: " + (res.data.message || "Unknown")); setRespOk(false); }
-    } catch (e: any) { setRespBody("Error: " + (e.message || "Network error")); setRespOk(false); }
-    setSendingDays(false);
-  };
-    setTimeout(fetchPiState, 5000);
-  };
-
-  const wings = piState ? Object.entries(piState.wings as Record<string, WingData>) : [];
-  const activeWing = piState?.active_wing || null;
-  const isOnline = piState && (Date.now() - new Date(piState.last_sync).getTime()) < 360000;
-  const uptime = piState ? Math.floor(piState.uptime_seconds / 3600) + "h " + Math.floor((piState.uptime_seconds % 3600) / 60) + "m" : "--";
-  const sinceSync = piState ? Math.floor((Date.now() - new Date(piState.last_sync).getTime()) / 1000) + "s ago" : "--";
-  const role = typeof window !== "undefined" ? localStorage.getItem("role") : "";
-  const isSuperAdmin = role === "super_admin";
-  const resetDayLocked = piState?.reset_day_lock_until ? new Date(piState.reset_day_lock_until) > new Date() : false;
-  const quotaLocked = piState?.quota_lock_until ? new Date(piState.quota_lock_until) > new Date() : false;
-
-  
 
-  const sendResetDay = async () => {
-    const day = parseInt(resetDayInput);
-    if (!day || day < 1 || day > 28 || !societyId) return;
-    setSettingResetDay(true);
-    setRespLabel("Set Reset Day");
-    setRespBody("Queuing...");
-    setRespOk(true);
-    try {
-      const lockUntil = isSuperAdmin ? null : new Date(Date.now() + 90*24*60*60*1000).toISOString();
-      const res = await api.post("/api/admin/pi-command", { society_id: societyId, command: "set_reset_day", params: { day, lock_until: lockUntil } });
-      if (res.data.success) {
-        setRespBody("Reset day set to " + day + "th." + (lockUntil ? " Locked 3 months until " + new Date(lockUntil).toLocaleDateString() + "." : ""));
-        setRespOk(true); setTimeout(fetchPiState, 5000);
-      } else { setRespBody("Failed: " + (res.data.message || "Unknown")); setRespOk(false); }
-    } catch (e: any) { setRespBody("Error: " + (e.message || "Network error")); setRespOk(false); }
-    setSettingResetDay(false);
-  };
 
   const confirmResetDay = () => {
     const day = parseInt(resetDayInput);
