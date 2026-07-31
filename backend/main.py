@@ -335,6 +335,7 @@ def queue_command(data: dict):
     wing = data.get("wing", "")
     pi = db.get("pi_state", {}).get(sid, {})
     skip_locks = params.get("skip_locks", False)
+    skip_locks = params.get("skip_locks", False)
     if not skip_locks and cmd in ("set_monthly_quota", "set_days") and pi.get("quota_lock_until", ""):
     skip_locks = params.get("skip_locks", False)
     if not skip_locks and cmd in ("set_monthly_quota", "set_days") and pi.get("quota_lock_until", ""):
