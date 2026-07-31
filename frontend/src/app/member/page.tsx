@@ -42,7 +42,7 @@ export default function MemberDashboard() {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar role="member" />
-      <main className="flex-1 overflow-y-auto p-6 pt-20 md:pt-6" style={{ background: "#0a0e17" }}>
+      <main className="flex-1 overflow-y-auto p-6 pt-20" style={{ background: "#0a0e17" }}>
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">Member View</h1>
