@@ -53,13 +53,7 @@ export default function SocietyDetail() {
     setCmdLoading(null);
   };
 
-  const doCalcUnits = () => {
-    const total = parseFloat(calcTotal) || 0; const days = parseInt(calcCycleDays) || 30;
-    if (total <= 0) { setCalcResult({}); return; }
-    const avg = total / days; const result: Record<string, number> = {};
-    const wk = piState ? Object.keys(piState.wings) : [];
-    wk.forEach((w) => { const u = parseFloat(calcWingUnits[w] || "5") || 0; result[w] = u > 0 ? Math.max(1, Math.floor(u / avg)) : 0; });
-    setCalcResult(result);
+  const doCalcUnits = () => {`n    const days = parseInt(calcCycleDays) || 30;`n    const wk = piState ? Object.keys(piState.wings) : [];`n    let total = 0;`n    wk.forEach((w) => { total += parseFloat(calcWingUnits[w] || "0") || 0; });`n    if (total <= 0) { setCalcResult({}); return; }`n    const avg = total / days; const result: Record<string, number> = {};`n    wk.forEach((w) => { const u = parseFloat(calcWingUnits[w] || "0") || 0; result[w] = u > 0 ? Math.max(1, Math.floor(u / avg)) : 0; });`n    setCalcResult(result);
   };
   const sendAllCalcDays = async () => {
     if (!isOnline || !societyId) return;
@@ -242,8 +236,8 @@ export default function SocietyDetail() {
                   {calcMode === "units" ? (
                     <>
                       <div className="flex gap-2">
-                        <input className="flex-1 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-xs text-gray-200" placeholder="Total Monthly Units" value={calcTotal} onChange={(e) => setCalcTotal(e.target.value)} />
-                        <input type="number" className="w-20 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-xs text-gray-200" placeholder="Days" value={calcCycleDays} onChange={(e) => setCalcCycleDays(e.target.value)} />
+                        
+                        <input type="number" className="w-full px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-xs text-gray-200" placeholder="Cycle Days (e.g. 30)" value={calcCycleDays} onChange={(e) => setCalcCycleDays(e.target.value)} />
                       </div>
                       {wings.map(([id]) => (
                         <div key={id} className="flex gap-2 items-center">
@@ -264,7 +258,7 @@ export default function SocietyDetail() {
                   {Object.keys(calcResult).length > 0 && (
                     <div className="bg-gray-800/50 rounded-lg p-3 space-y-1">
                       <div className="text-[10px] text-amber-400 font-bold text-center mb-1">
-                        {calcMode === "units" && calcTotal && calcCycleDays ? "Avg: " + (parseFloat(calcTotal) / parseInt(calcCycleDays)).toFixed(2) + " units/day" : "Direct Days Mode"}
+                        {calcMode === "units" ? "Total: " + Object.values(calcWingUnits).reduce((a, v) => a + (parseFloat(v) || 0), 0) + " units | Avg: " + (Object.values(calcWingUnits).reduce((a, v) => a + (parseFloat(v) || 0), 0) / (parseInt(calcCycleDays) || 30)).toFixed(2) + " units/day" : "Direct Days Mode"}
                       </div>
                       {Object.entries(calcResult).map(([id, days]) => (
                         <div key={id} className="flex justify-between text-[10px]"><span className="text-gray-500">Wing {id}</span><span className="text-cyan-400 font-bold font-mono">{days} days</span></div>
