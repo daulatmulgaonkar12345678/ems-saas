@@ -52,6 +52,7 @@ def keepalive():
     _keepalive_ts = time.time()
     return PlainTextResponse("alive")
 
+@app.head("/ping")
 @app.get("/ping")
 def ping():
     global _keepalive_ts
