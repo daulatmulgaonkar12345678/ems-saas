@@ -122,7 +122,6 @@ export default function AdminDashboard() {
   const quotaLocked = piState?.quota_lock_until ? new Date(piState.quota_lock_until) > new Date() : false;
   const resetDayLocked = piState?.reset_day_lock_until ? new Date(piState.reset_day_lock_until) > new Date() : false;
 
-  // cache-bust v2
   if (loading) return <div className="flex h-screen items-center justify-center text-gray-500">Loading...</div>;
 
   return (

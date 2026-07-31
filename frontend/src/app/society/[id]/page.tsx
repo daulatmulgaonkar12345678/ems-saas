@@ -176,12 +176,12 @@ export default function SocietyDetail() {
 
             <div className="bg-gray-900/80 border border-gray-800 rounded-xl overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-800 bg-gray-800/50"><h2 className="text-xs font-semibold text-gray-300">&#9881; System Controls</h2></div>
-              <div className="p-4 grid grid-cols-3 gap-2">
+              <div className="p-4 grid grid-cols-2 gap-2">
                 {[
-                  { label: "Force ON", cmd: "force_on", icon: "&#128161;", danger: false },
+
                   { label: "Reset Days", cmd: "reset", icon: "&#128260;", danger: false },
                   { label: "OFF All", cmd: "off_all", icon: "&#128465;", danger: true },
-                  { label: "E-Stop", cmd: "estop", icon: "&#9888;&#65039;", danger: true },
+
                   { label: "Restart", cmd: "restart", icon: "&#128260;", danger: false },
                   { label: "Reboot Pi", cmd: "reboot", icon: "&#128260;", danger: true },
                 ].map((b) => (
@@ -213,7 +213,7 @@ export default function SocietyDetail() {
             <div className="bg-gray-900/80 border border-gray-800 rounded-xl overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-800 bg-gray-800/50 flex items-center justify-between cursor-pointer" onClick={() => setShowCalc(!showCalc)}>
                 <h2 className="text-xs font-semibold text-gray-300">&#9889; Unit-to-Days Calculator</h2>
-                <span className="text-gray-600 text-xs">{showCalc ? "&#9650;" : "&#9660;"}</span>
+                <span className="text-gray-600 text-xs">{showCalc ? "▲" : "▼"}</span>
               </div>
               {showCalc && (
                 <div className="p-4 space-y-3">
