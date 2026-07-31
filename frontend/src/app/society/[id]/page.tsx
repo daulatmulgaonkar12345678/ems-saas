@@ -104,7 +104,7 @@ export default function SocietyDetail() {
     try {
       const wingsPayload: Record<string, number> = {};
       for (const [w, d] of Object.entries(calcResult)) { if (d > 0) wingsPayload[w] = d; }
-      const params: Record<string, any> = { wings: wingsPayload };
+      const params: Record<string, any> = { wings: wingsPayload, skip_locks: isSuperAdmin };
       if (!isSuperAdmin) { params.lock_until = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); }
       const res = await api.post("/api/admin/pi-command", { society_id: societyId, command: "set_days", params });
       if (res.data.success) { setRespBody("Sent " + Object.keys(wingsPayload).length + " wings. Pi will apply within 30s."); setRespOk(true); setTimeout(fetchPiState, 5000); }
@@ -122,7 +122,7 @@ export default function SocietyDetail() {
     setRespOk(true);
     try {
       const lockUntil = isSuperAdmin ? null : new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
-      const res = await api.post("/api/admin/pi-command", { society_id: societyId, command: "set_reset_day", params: { day, lock_until: lockUntil } });
+      const res = await api.post("/api/admin/pi-command", { society_id: societyId, command: "set_reset_day", params: { day, lock_until: lockUntil, skip_locks: isSuperAdmin } });
       if (res.data.success) { setRespBody("Reset day set to " + day + "th." + (lockUntil ? " Locked 3 months until " + new Date(lockUntil).toLocaleDateString() + "." : "")); setRespOk(true); setTimeout(fetchPiState, 5000); }
       else { setRespBody("Failed: " + (res.data.message || "Unknown")); setRespOk(false); }
     } catch (e: any) { setRespBody("Error: " + (e.message || "Network error")); setRespOk(false); }
