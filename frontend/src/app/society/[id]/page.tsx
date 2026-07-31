@@ -29,6 +29,7 @@ export default function SocietyDetail() {
   const [calcCycleDays, setCalcCycleDays] = useState("30");
   const [calcWingUnits, setCalcWingUnits] = useState<Record<string, string>>({});
   const [calcResult, setCalcResult] = useState<Record<string, number>>({});
+  const [sendingDays, setSendingDays] = useState(false);
   const eventsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { const role = localStorage.getItem("role"); if (role !== "super_admin" && role !== "society_admin") router.push("/login"); }, [router]);
@@ -59,6 +60,24 @@ export default function SocietyDetail() {
     const wk = piState ? Object.keys(piState.wings) : [];
     wk.forEach((w) => { const u = parseFloat(calcWingUnits[w] || "5") || 0; result[w] = u > 0 ? Math.max(1, Math.floor(u / avg)) : 0; });
     setCalcResult(result);
+  };
+  const sendAllCalcDays = async () => {
+    if (!isOnline || !societyId) return;
+    setSendingDays(true);
+    let sent = 0;
+    for (const [wing, days] of Object.entries(calcResult)) {
+      if (!days || days < 1) continue;
+      try {
+        const lockUntil = new Date(Date.now() + 30*24*60*60*1000).toISOString();
+        const res = await api.post("/api/admin/pi-command", { society_id: societyId, command: "set_days", wing, params: { days, lock_until: lockUntil } });
+        if (res.data.success) sent++;
+      } catch {}
+    }
+    setRespLabel("Send All Days");
+    setRespBody("Sent " + sent + "/" + Object.keys(calcResult).length + " wings. Pi will apply within 30s.");
+    setRespOk(true);
+    setSendingDays(false);
+    setTimeout(fetchPiState, 5000);
   };
 
   const wings = piState ? Object.entries(piState.wings as Record<string, WingData>) : [];
@@ -250,7 +269,8 @@ export default function SocietyDetail() {
                       {Object.entries(calcResult).map(([id, days]) => (
                         <div key={id} className="flex justify-between text-[10px]"><span className="text-gray-500">Wing {id}</span><span className="text-cyan-400 font-bold font-mono">{days} days</span></div>
                       ))}
-                    </div>
+                    
+                      <button onClick={sendAllCalcDays} disabled={sendingDays || !isOnline || cmdLoading !== null} className="w-full mt-2 py-1.5 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold rounded hover:bg-cyan-500/30 disabled:opacity-30">{sendingDays ? "Sending..." : "SEND ALL DAYS TO PI"}</button></div>
                   )}
                 </div>
               )}
