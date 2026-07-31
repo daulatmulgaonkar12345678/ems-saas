@@ -232,7 +232,7 @@ def force_firmware(data: dict):
 @app.post("/api/pi/sync")
 def pi_sync(payload: dict):
     print("=== PI RAW PAYLOAD ===", payload)
-    sid = payload.get("societyId", "")
+    sid = int(payload.get("societyId", 0))
     db = load_db()
     society = next((s for s in db["societies"] if s["id"] == sid), None)
     if not society:
