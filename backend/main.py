@@ -292,7 +292,8 @@ def pi_sync(payload: dict):
     if "pi_events" not in db: db["pi_events"] = {}
     if sid not in db["pi_events"]: db["pi_events"][sid] = []
     for ev in payload.get("events", []): db["pi_events"][sid].append(ev)
-    if len(db["pi_events"][sid]) > 500: db["pi_events"][sid] = db["pi_events"][sid][-500:]`n    save_db(db)
+    if len(db["pi_events"][sid]) > 500: db["pi_events"][sid] = db["pi_events"][sid][-500:]
+    save_db(db)
     reply = {"success": True, "command": None}
     cmds = db.get("pi_commands", {})
     if sid in cmds and cmds[sid].get("command"):
