@@ -53,15 +53,35 @@ export default function SocietyDetail() {
     setCmdLoading(null);
   };
 
-  const doCalcUnits = () => {
-    const days = parseInt(calcCycleDays) || 30;
-    const wk = piState ? Object.keys(piState.wings) : [];
-    let total = 0;
-    wk.forEach((w) => { total += parseFloat(calcWingUnits[w] || "0") || 0; });
-    if (total <= 0) { setCalcResult({}); return; }
-    const avg = total / days; const result: Record<string, number> = {};
-    wk.forEach((w) => { const u = parseFloat(calcWingUnits[w] || "0") || 0; result[w] = u > 0 ? Math.max(1, Math.floor(u / avg)) : 0; });
-    setCalcResult(result);
+  const doCalcUnits = () => {
+    const days = parseInt(calcCycleDays) || 30;
+    const wk = piState ? Object.keys(piState.wings) : [];
+    let total = 0;
+    wk.forEach((w) => { total += parseFloat(calcWingUnits[w] || "0") || 0; });
+    if (total <= 0) { setCalcResult({}); return; }
+    const avg = total / days;
+    const exact: Record<string, number> = {};
+    const rounded: Record<string, number> = {};
+    let sum = 0;
+    wk.forEach((w) => {
+      const u = parseFloat(calcWingUnits[w] || "0") || 0;
+      const ed = u / avg;
+      exact[w] = ed;
+      rounded[w] = Math.round(ed);
+      sum += rounded[w];
+    });
+    const diff = days - sum;
+    if (diff !== 0) {
+      const sorted = wk.slice().sort((a, b) => {
+        const fa = exact[a] - Math.floor(exact[a]);
+        const fb = exact[b] - Math.floor(exact[b]);
+        return diff > 0 ? fb - fa : fa - fb;
+      });
+      for (let i = 0; i < Math.abs(diff); i++) { rounded[sorted[i]] += diff > 0 ? 1 : -1; }
+    }
+    wk.forEach((w) => { const u = parseFloat(calcWingUnits[w] || "0") || 0; if (u > 0 && rounded[w] < 1) rounded[w] = 1; });
+    setCalcResult(rounded);
+
 
   };
   const sendAllCalcDays = async () => {
