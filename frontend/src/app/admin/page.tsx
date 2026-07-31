@@ -133,8 +133,6 @@ export default function AdminDashboard() {
             {editSocName ? (
               <div className="flex items-center gap-2">
                 <input className="px-3 py-1.5 bg-gray-800 border border-cyan-500 rounded text-sm text-white focus:outline-none" value={socDisplayName} onChange={(e) => setSocDisplayName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && saveSocDisplayName()} autoFocus />
-                
-                ))}
               </div>
             </div>
 
