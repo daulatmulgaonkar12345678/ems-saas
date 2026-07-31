@@ -1,4 +1,4 @@
-import os, json, time
+﻿import os, json, time
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -70,6 +70,14 @@ def seed_db():
             {"id": next_id(db["users"]), "email": "admin@ems.com", "name": "Super Admin", "password": pwd_context.hash("admin123"), "role": "super_admin", "society_id": None},
         ])
         save_db(db)
+
+    # Migration: normalize pi_state/pi_events/pi_commands keys to int
+    for nk in ["pi_state", "pi_events", "pi_commands"]:
+        if nk in db and db[nk]:
+            rebuilt = {int(k): v for k, v in db[nk].items()}
+            if rebuilt != db[nk]:
+                db[nk] = rebuilt
+                save_db(db)
     return {"message": "Seeded! admin@ems.com / sec@prestine.com / member@prestine.com"}
 
 @app.on_event("startup")
@@ -141,6 +149,7 @@ def save_society(data: dict):
 
 @app.post("/api/super-admin/societies/delete")
 def delete_society(data: dict):
+    sid = int(sid)
     db = load_db()
     sid = data.get("id")
     db["societies"] = [s for s in db["societies"] if s["id"] != sid]
