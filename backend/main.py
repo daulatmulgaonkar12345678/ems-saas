@@ -18,7 +18,10 @@ _keepalive_ts = time.time()
 def load_db():
     if os.path.exists(DB_FILE):
         with open(DB_FILE, "r") as f:
-            try: db = json.load(f)`n            except: return {"users": [], "societies": [], "pi_state": {}, "pi_events": {}, "pi_commands": {}, "firmware_versions": []}
+            try:
+                db = json.load(f)
+            except:
+                return {"users": [], "societies": [], "pi_state": {}, "pi_events": {}, "pi_commands": [], "firmware_versions": []}
             for nk in ["pi_state", "pi_events", "pi_commands"]:
                 if nk in db and db[nk]:
                     db[nk] = {int(k): v for k, v in db[nk].items()}
@@ -334,8 +337,8 @@ def queue_command(data: dict):
     params = data.get("params", {})
     wing = data.get("wing", "")
     pi = db.get("pi_state", {}).get(sid, {})
-    skip_locks = params.get("skip_locks", False)
     if cmd in ("set_monthly_quota", "set_days") and pi.get("quota_lock_until", ""):
+    skip_locks = params.get("skip_locks", False)
     if not skip_locks and cmd in ("set_monthly_quota", "set_days") and pi.get("quota_lock_until", ""):
             lock_until = datetime.fromisoformat(pi["quota_lock_until"])
             if datetime.now(timezone.utc) < lock_until:
