@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-2">
                 <input className="px-3 py-1.5 bg-gray-800 border border-cyan-500 rounded text-sm text-white focus:outline-none" value={socDisplayName} onChange={(e) => setSocDisplayName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && saveSocDisplayName()} autoFocus />
               </div>
-            </div>
+            ) : null}
 
             <div className="bg-gray-900/80 border border-gray-800 rounded-xl overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-800 bg-gray-800/50">
@@ -156,6 +156,26 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-900/80 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-800 bg-gray-800/50">
+            <h2 className="text-xs font-semibold text-gray-300">&#9881; System Controls</h2>
+          </div>
+          <div className="p-4 grid grid-cols-2 gap-3">
+            <button onClick={() => sendResetDay()} disabled={settingResetDay || !isOnline} className="flex items-center justify-center gap-2 p-3 bg-gray-800 border border-gray-700 rounded-lg text-sm font-medium text-gray-200 hover:border-cyan-500 hover:text-cyan-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              &#128260; Reset Days
+            </button>
+            <button onClick={() => sendCmd("off_all", "", "OFF ALL")} disabled={cmdLoading !== null || !isOnline} className="flex items-center justify-center gap-2 p-3 bg-gray-800 border border-red-900/50 rounded-lg text-sm font-medium text-red-400 hover:bg-red-900/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              &#128465; OFF All
+            </button>
+            <button onClick={() => sendCmd("restart_system", "", "RESTART SYSTEM")} disabled={cmdLoading !== null || !isOnline} className="flex items-center justify-center gap-2 p-3 bg-gray-800 border border-amber-900/50 rounded-lg text-sm font-medium text-amber-400 hover:bg-amber-900/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              &#128260; Restart
+            </button>
+            <button onClick={() => sendCmd("reboot_device", "", "REBOOT PI")} disabled={cmdLoading !== null || !isOnline} className="flex items-center justify-center gap-2 p-3 bg-gray-800 border border-gray-700 rounded-lg text-sm font-medium text-gray-200 hover:border-cyan-500 hover:text-cyan-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              &#128260; Reboot Pi
+            </button>
           </div>
         </div>
 
