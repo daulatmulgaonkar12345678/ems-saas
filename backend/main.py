@@ -334,14 +334,15 @@ def queue_command(data: dict):
     params = data.get("params", {})
     wing = data.get("wing", "")
     pi = db.get("pi_state", {}).get(sid, {})
-    if cmd in ("set_monthly_quota", "set_days") and pi.get("quota_lock_until", ""):
+    skip_locks = params.get("skip_locks", False)
+    if not skip_locks and cmd in ("set_monthly_quota", "set_days") and pi.get("quota_lock_until", ""):
     skip_locks = params.get("skip_locks", False)
     if not skip_locks and cmd in ("set_monthly_quota", "set_days") and pi.get("quota_lock_until", ""):
             lock_until = datetime.fromisoformat(pi["quota_lock_until"])
             if datetime.now(timezone.utc) < lock_until:
                 raise HTTPException(400, f"Quota locked until {pi['quota_lock_until']}")
         except: pass
-    if cmd == "set_reset_day" and pi.get("reset_day_lock_until", ""):
+    if not skip_locks and cmd == "set_reset_day" and pi.get("reset_day_lock_until", ""):
     if not skip_locks and cmd == "set_reset_day" and pi.get("reset_day_lock_until", ""):
             lock_until = datetime.fromisoformat(pi["reset_day_lock_until"])
             if datetime.now(timezone.utc) < lock_until:
