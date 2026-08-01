@@ -220,8 +220,8 @@ export default function SocietyDetail() {
                       </div>
                     </div>
                     <div className="flex gap-2 mb-2">
-                      <button onClick={() => sendCmd("switch", id, "Switch to " + id)} disabled={cmdLoading !== null || !isOnline || piState?.emergency_stop} className="flex-1 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-black text-[10px] font-bold rounded disabled:opacity-30">SWITCH TO</button>
-                      <button onClick={() => sendCmd("off_all", "", "Turn off")} disabled={cmdLoading !== null || !isOnline || !isActive || piState?.emergency_stop} className="flex-1 py-1.5 bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold rounded disabled:opacity-30">TURN OFF</button>
+                      <button onClick={() => { if (window.confirm("Switch to Wing " + id + "?\n\nActive relay will change.")) sendCmd("switch", id, "Switch to " + id); }} disabled={cmdLoading !== null || !isOnline || piState?.emergency_stop} className="flex-1 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-black text-[10px] font-bold rounded disabled:opacity-30">SWITCH TO</button>
+                      <button onClick={() => { if (window.confirm("Turn OFF all wings?\n\nAll relays will be de-energized.")) sendCmd("off_all", "", "Turn off"); }} disabled={cmdLoading !== null || !isOnline || !isActive || piState?.emergency_stop} className="flex-1 py-1.5 bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold rounded disabled:opacity-30">TURN OFF</button>
                     </div>
                     <div className="flex justify-between text-[10px] mb-1">
                       <span className="text-gray-500">Days: {w.used_days} / {w.target_days}</span>
@@ -273,7 +273,7 @@ export default function SocietyDetail() {
                   <input type="number" className="w-14 px-2 py-1.5 bg-gray-800 border border-gray-700 rounded text-xs text-center text-gray-200 focus:outline-none focus:border-cyan-500" value={lcdTime} onChange={(e) => setLcdTime(e.target.value)} min="1" max="300" />
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => { if (!lcd1 && !lcd2) return; sendCmd("lcd", "", "LCD: " + lcd1 + " | " + lcd2); }} disabled={cmdLoading !== null || !isOnline || (!lcd1 && !lcd2)} className="flex-1 py-1.5 bg-cyan-500 text-black text-[10px] font-bold rounded disabled:opacity-30">SEND</button>
+                  <button onClick={() => { if (!lcd1 && !lcd2) return; if (window.confirm("Send to LCD display?\nLine 1: " + lcd1 + "\nLine 2: " + lcd2)) sendCmd("lcd", "", "LCD: " + lcd1 + " | " + lcd2); }} disabled={cmdLoading !== null || !isOnline || (!lcd1 && !lcd2)} className="flex-1 py-1.5 bg-cyan-500 text-black text-[10px] font-bold rounded disabled:opacity-30">SEND</button>
                   <button onClick={() => { setLcd1(""); setLcd2(""); }} className="px-3 py-1.5 border border-gray-700 text-gray-500 text-[10px] rounded hover:border-red-500 hover:text-red-400">CLEAR</button>
                 </div>
               </div>
