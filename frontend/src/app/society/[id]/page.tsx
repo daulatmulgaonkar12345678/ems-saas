@@ -254,7 +254,7 @@ export default function SocietyDetail() {
                   { label: "Restart", cmd: "restart", icon: "&#128260;", danger: false },
                   { label: "Reboot Pi", cmd: "reboot", icon: "&#128260;", danger: true },
                 ].map((b) => (
-                  <button key={b.cmd} onClick={() => sendCmd(b.cmd, "", b.label)} disabled={cmdLoading !== null || !isOnline} className={"p-2 rounded-lg border text-[9px] font-semibold flex flex-col items-center gap-1 transition-all disabled:opacity-30 " + (b.danger ? "border-gray-800 text-gray-400 hover:border-red-500 hover:text-red-400 hover:bg-red-500/5" : "border-gray-800 text-gray-400 hover:border-cyan-500 hover:text-cyan-400 hover:bg-cyan-500/5")}>
+                  <button key={b.cmd} onClick={() => { if (window.confirm(b.danger ? "⚠️ " + b.label + "\n\nThis affects the EMS system." : b.label + "?")) sendCmd(b.cmd, "", b.label); }} disabled={cmdLoading !== null || !isOnline} className={"p-2 rounded-lg border text-[9px] font-semibold flex flex-col items-center gap-1 transition-all disabled:opacity-30 " + (b.danger ? "border-gray-800 text-gray-400 hover:border-red-500 hover:text-red-400 hover:bg-red-500/5" : "border-gray-800 text-gray-400 hover:border-cyan-500 hover:text-cyan-400 hover:bg-cyan-500/5")}>
                     <span className="text-base" dangerouslySetInnerHTML={{ __html: b.icon }} />{b.label}
                   </button>
                 ))}
@@ -333,7 +333,7 @@ export default function SocietyDetail() {
                       {Object.entries(calcResult).map(([id, days]) => (
                         <div key={id} className="flex justify-between text-[10px]"><span className="text-gray-500">Wing {id}</span><span className="text-cyan-400 font-bold font-mono">{days} days</span></div>
                       ))}
-                      <button onClick={sendAllCalcDays} disabled={sendingDays || !isOnline || cmdLoading !== null || (quotaLocked && !isSuperAdmin)} className="w-full mt-2 py-1.5 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold rounded hover:bg-cyan-500/30 disabled:opacity-30">{sendingDays ? "Sending..." : "SEND ALL DAYS TO PI"}</button>
+                      <button onClick={() => { if (window.confirm("⚡ Send " + Object.keys(calcResult).length + " wing day settings to Pi?\n\nThis updates the Pi directly.")) sendAllCalcDays(); }} disabled={sendingDays || !isOnline || cmdLoading !== null || (quotaLocked && !isSuperAdmin)} className="w-full mt-2 py-1.5 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold rounded hover:bg-cyan-500/30 disabled:opacity-30">{sendingDays ? "Sending..." : "SEND ALL DAYS TO PI"}</button>
                     </div>
                   )}
                 </div>
