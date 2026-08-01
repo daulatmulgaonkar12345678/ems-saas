@@ -41,8 +41,8 @@ export default function SocietyDetail() {
   const fetchEvents = useCallback(async () => { if (!societyId) return; try { const res = await api.get("/api/admin/pi-events?society_id=" + societyId + "&since=" + eventSince); if (res.data.events.length > 0) { setEvents((p) => [...p, ...res.data.events]); setEventSince(res.data.next); } } catch {} }, [societyId, eventSince]);
 
   useEffect(() => { fetchSociety(); fetchPiState(); fetchEvents(); setLoading(false); }, [fetchSociety, fetchPiState, fetchEvents]);
-  useEffect(() => { const i = setInterval(fetchPiState, 5000); return () => clearInterval(i); }, [fetchPiState]);
-  useEffect(() => { const i = setInterval(fetchEvents, 3000); return () => clearInterval(i); }, [fetchEvents]);
+  useEffect(() => { const i = setInterval(fetchPiState, 10000); return () => clearInterval(i); }, [fetchPiState]);
+  useEffect(() => { const i = setInterval(fetchEvents, 10000); return () => clearInterval(i); }, [fetchEvents]);
   useEffect(() => { eventsEndRef.current && (eventsEndRef.current.scrollTop = eventsEndRef.current.scrollHeight); }, [events]);
 
   const sendCmd = async (command: string, wing: string = "", label: string = "") => {
